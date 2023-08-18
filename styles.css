@@ -1,1 +1,21 @@
 /* css styles */
+.quarto-listing-table * {
+    border: 0px transparent;
+}
+
+.quarto-listing-table>thead {
+    border: 0px transparent;
+}
+
+.quarto-listing-table>:not(:first-child) {
+    border-top: 0px transparent;
+}
+
+.navbar-title {
+    transform:scale(-1, 1);
+    width:fit-content;
+}
+
+h3 {
+    margin-top: 5rem;
+}
