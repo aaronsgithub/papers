@@ -1,7 +1,15 @@
 ---
 title: "Papers"
+listing:
+  contents:
+    - "papers/"
+  type: table
+  sort:
+    - "date"
+    - "title desc"
+  fields: ["date", "title"]
+date-format: iso
+
 ---
+I have read.
 
-This is a Quarto website.
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.

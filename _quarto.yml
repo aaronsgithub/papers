@@ -2,12 +2,12 @@ project:
   type: website
 
 website:
-  title: "Papers"
+  # title: "🤔"
+  title: Papers
   navbar:
     left:
       - href: index.qmd
-        text: Home
-      - about.qmd
+        text: "{{< fa solid house >}}"
 
 format:
   html:
@@ -17,5 +17,3 @@ format:
 
 execute:
   freeze: auto
-
-

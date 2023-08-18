@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2023-08-16">
+
+<title>Papers - LoRA: Low Ranked Adaption of Large-Language Models</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Papers</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text"><i class="fa-solid fa-house" aria-label="house"></i></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#goal" id="toc-goal" class="nav-link active" data-scroll-target="#goal">Goal</a></li>
+  <li><a href="#full-fine-tuning" id="toc-full-fine-tuning" class="nav-link" data-scroll-target="#full-fine-tuning">Full Fine Tuning</a></li>
+  <li><a href="#prevailing-alternative-methods-before-lora" id="toc-prevailing-alternative-methods-before-lora" class="nav-link" data-scroll-target="#prevailing-alternative-methods-before-lora">Prevailing alternative methods before LoRA</a></li>
+  <li><a href="#inspiration-intrinsic-dimension" id="toc-inspiration-intrinsic-dimension" class="nav-link" data-scroll-target="#inspiration-intrinsic-dimension">Inspiration: “Intrinsic Dimension”</a></li>
+  <li><a href="#hypothesis" id="toc-hypothesis" class="nav-link" data-scroll-target="#hypothesis">Hypothesis</a></li>
+  <li><a href="#weight-freezing" id="toc-weight-freezing" class="nav-link" data-scroll-target="#weight-freezing">Weight Freezing</a></li>
+  <li><a href="#matrix-products-and-rank" id="toc-matrix-products-and-rank" class="nav-link" data-scroll-target="#matrix-products-and-rank">Matrix products and Rank</a></li>
+  <li><a href="#low-rank-updates" id="toc-low-rank-updates" class="nav-link" data-scroll-target="#low-rank-updates">Low Rank Updates</a></li>
+  <li><a href="#advantages" id="toc-advantages" class="nav-link" data-scroll-target="#advantages">Advantages</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
+  <li><a href="#application-to-transformers" id="toc-application-to-transformers" class="nav-link" data-scroll-target="#application-to-transformers">Application to Transformers</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a>
+  <ul class="collapse">
+  <li><a href="#inference-latency" id="toc-inference-latency" class="nav-link" data-scroll-target="#inference-latency">Inference Latency</a></li>
+  <li><a href="#benchmark-scores" id="toc-benchmark-scores" class="nav-link" data-scroll-target="#benchmark-scores">Benchmark scores</a></li>
+  <li><a href="#scaling-up-gpt-3-175b" id="toc-scaling-up-gpt-3-175b" class="nav-link" data-scroll-target="#scaling-up-gpt-3-175b">Scaling up: GPT-3 175b</a></li>
+  <li><a href="#which-weights-should-we-pick" id="toc-which-weights-should-we-pick" class="nav-link" data-scroll-target="#which-weights-should-we-pick">Which weights should we pick?</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">LoRA: Low Ranked Adaption of Large-Language Models</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 16, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<blockquote class="blockquote">
+<p>📃 <a href="https://arxiv.org/abs/2106.09685">https://arxiv.org/abs/2106.09685</a></p>
+</blockquote>
+<p>Authors</p>
+<blockquote class="blockquote">
+<p>Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, Weizhu Chen</p>
+</blockquote>
+<p><img src="001_LoRA_files/figure-html/858d5d98-1-image.png" class="img-fluid"></p>
+<ul>
+<li>Full fine tuning - retraining all parameters is expensive and impractical for large models.</li>
+<li>LoRA is a fine tuning technique which:
+<ul>
+<li>does not mutate existing weights</li>
+<li>does not add inference latency to original model (unlike Adapter techniques)</li>
+<li><span class="math inline">\(\Rightarrow\)</span> performs <span class="math inline">\(\geq\)</span> full fine tuning</li>
+<li><span class="math inline">\(\Rightarrow\)</span> deploy multiple finetuned versions of a model with little hardware costs</li>
+</ul></li>
+<li>Empirical study</li>
+<li>LoRA PyTorch package and model checkpoints from their study.</li>
+</ul>
+<section id="goal" class="level3">
+<h3 class="anchored" data-anchor-id="goal">Goal</h3>
+<p>Given a pre-trained model, we want to create a variation of that model which is:</p>
+<ul>
+<li>performant on a specific downstream task</li>
+<li>has been trained on a new dataset, unseen by the pre-trained model</li>
+</ul>
+</section>
+<section id="full-fine-tuning" class="level3">
+<h3 class="anchored" data-anchor-id="full-fine-tuning">Full Fine Tuning</h3>
+<p><img src="fft.png" class="img-fluid"></p>
+<p>Train a variant of the model by updating all the parameters<br>
+<span class="math inline">\(\Rightarrow\)</span> expensive to train<br>
+<span class="math inline">\(\Rightarrow\)</span> for large models:</p>
+<ul>
+<li>a single deployment is a challenge</li>
+<li>deploying multiple fully fine tuned versions for each downstream task is impractical</li>
+</ul>
+</section>
+<section id="prevailing-alternative-methods-before-lora" class="level3">
+<h3 class="anchored" data-anchor-id="prevailing-alternative-methods-before-lora">Prevailing alternative methods before LoRA</h3>
+<section id="adapter-methods" class="level4">
+<h4 class="anchored" data-anchor-id="adapter-methods">Adapter methods</h4>
+<blockquote class="blockquote">
+<p>📃 <a href="https://arxiv.org/abs/1902.00751">Parameter-Efficient Transfer Learning for NLP by Houlsby et al.</a></p>
+</blockquote>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="adapter.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Adapter layer architecture, and integration with Transformer</figcaption>
+</figure>
+</div>
+<ul>
+<li>add adapters or “bottleneck layers” to targeted parameters you wish to fine tune</li>
+<li>original parameters are frozen</li>
+</ul>
+<p><span class="math inline">\(\Rightarrow\)</span> results in a fine tuned model trained with fewer learned parameters than full fine tuning<br>
+<span class="math inline">\(\Rightarrow\)</span> extends the size of the network, leading to higher interence times</p>
+<p><img src="adapter-review.png" class="img-fluid"></p>
+<p><img src="versus-adapter.png" class="img-fluid"></p>
+</section>
+<section id="optimizing-input" class="level4">
+<h4 class="anchored" data-anchor-id="optimizing-input">Optimizing input</h4>
+<blockquote class="blockquote">
+<p>📃 <a href="http://arxiv.org/abs/2101.00190">Prefix-Tuning: Optimizing Continuous Prompts for Generation</a></p>
+</blockquote>
+<ul>
+<li>Train an input vector prefix suited to the task<br>
+<span class="math inline">\(\Rightarrow\)</span> consumes input context length</li>
+</ul>
+<p><img src="input-optimisation.png" class="img-fluid"></p>
+</section>
+<section id="conclusion" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion">Conclusion</h4>
+<p><span class="math inline">\(\Rightarrow\)</span> Trading off lower training costs for model quality<br>
+<span class="math inline">\(\Rightarrow\)</span> These methods often fail to match the fine-tuning baseline</p>
+</section>
+</section>
+<section id="inspiration-intrinsic-dimension" class="level3">
+<h3 class="anchored" data-anchor-id="inspiration-intrinsic-dimension">Inspiration: “Intrinsic Dimension”</h3>
+<ul>
+<li>When we train deep learning networks, our architecture determines the number of parameters <span class="math inline">\(|\Theta| = P\)</span>.</li>
+<li>But once trained, often the networks are over-parameterized<br>
+<span class="math inline">\(\Rightarrow\)</span> the power of the learned models can be expressed with fewer parameters <span class="math inline">\(D &lt; P\)</span>.</li>
+</ul>
+<blockquote class="blockquote">
+<p>📃 <a href="https://arxiv.org/abs/1804.08838">Measuring the Intrinsic Dimension of Objective Landscapes by Li et al.&nbsp;(2018)</a></p>
+</blockquote>
+<ul>
+<li>Start with a prior model architecture with <span class="math inline">\(|\Theta| = P\)</span> parameters.</li>
+<li>Reimplement the model architecture by initialising the P parameters randomly and then freezing P - D of them.</li>
+<li>Train the model using only the free D parameters.</li>
+<li>Repeat the experiment until the performance reaches 90% of the original model <span class="math inline">\(\Rightarrow\)</span> <strong>Intrinsic Dimension</strong>.</li>
+</ul>
+<hr>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mnist_intrinsic_dimension.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure: Intrinsic dimensions of MNIST models</figcaption>
+</figure>
+</div>
+<hr>
+<blockquote class="blockquote">
+<p>📃 <a href="https://arxiv.org/abs/2012.13255">Intrinsic Dimensionality Explains the Effectiveness of Language Model Fine-Tuning by Aghajanyan et al.&nbsp;(2020)</a></p>
+</blockquote>
+<p><img src="low-rank.png" class="img-fluid"></p>
+</section>
+<section id="hypothesis" class="level3">
+<h3 class="anchored" data-anchor-id="hypothesis">Hypothesis</h3>
+<p><img src="hypothesis2.png" class="img-fluid"></p>
+<p>When fine tuning a weight <span class="math inline">\(W\)</span> to get our fine-tuned weight <span class="math inline">\(W^{\prime}\)</span> <span class="math display">\[W^\prime = W + \Delta W\]</span> the intrinsic rank of <span class="math inline">\(\Delta W\)</span> is small.</p>
+</section>
+<section id="weight-freezing" class="level3">
+<h3 class="anchored" data-anchor-id="weight-freezing">Weight Freezing</h3>
+<p>Consider a linear layer <span class="math display">\[ y = W \cdot x + b\]</span> and suppose we want to fine tune <span class="math inline">\(W\)</span>.</p>
+<p>We can freeze <span class="math inline">\(W=W_0\)</span> and <span class="math inline">\(b=b_0\)</span>, then learn a new tensor <span class="math inline">\(Z\)</span> which has the same dimension as <span class="math inline">\(W\)</span> : <span class="math display">\[
+y =  (W_0+ Z) \cdot  x + b_0  \tag{$\star$}
+\]</span> where <span class="math inline">\(Z = \Delta W\)</span>, “the accumulated gradient update”.</p>
+<p>Backpropagation should be able to express the same updates through Z as it would if we were updating W directly.</p>
+<p>Then for inference with our fine-tuned model, we can simply swap out <span class="math inline">\(W\)</span> for <span class="math inline">\(W^{^{\prime}} = W + Z\)</span>.</p>
+</section>
+<section id="matrix-products-and-rank" class="level3">
+<h3 class="anchored" data-anchor-id="matrix-products-and-rank">Matrix products and Rank</h3>
+<p>Rank <span class="math inline">\(\approx\)</span> number of rows in a matrix</p>
+<p>Suppose <span class="math inline">\(Z\)</span> is an <span class="math inline">\(m \times n\)</span> matrix. Then any matrices <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> satisfying</p>
+<p><span class="math display">\[Z = B \cdot A\]</span></p>
+<p>will be of size <span class="math inline">\(m \times r\)</span> and <span class="math inline">\(r \times n\)</span> respectively for some <span class="math inline">\(r\)</span>.</p>
+<p>Regardless of the value of <span class="math inline">\(r\)</span>, we will always get back an <span class="math inline">\(m \times n\)</span> matrix.</p>
+<p>Factorizing <span class="math inline">\(Z\)</span> into matrices <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> and choosing small <span class="math inline">\(r\)</span> results in fewer parameters to learn.</p>
+<blockquote class="blockquote">
+<p>Example<br>
+If <span class="math inline">\(m=20\)</span>, <span class="math inline">\(n=10\)</span> then <span class="math inline">\(Z\)</span> has <span class="math inline">\(|Z| = m \cdot n = 200\)</span> parameters.<br>
+If <span class="math inline">\(k=r\)</span>, then <span class="math inline">\(|A| = 20 \cdot 2 = 40\)</span> and <span class="math inline">\(|B| = 2 \cdot 10 = 20\)</span> then by factorizing <span class="math inline">\(W\)</span> into <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> we only need to learn <span class="math inline">\(60\)</span> parameters versus 200.</p>
+</blockquote>
+</section>
+<section id="low-rank-updates" class="level3">
+<h3 class="anchored" data-anchor-id="low-rank-updates">Low Rank Updates</h3>
+<p>Implementing Matrix decomposition in <span class="math inline">\((\star)\)</span></p>
+<p><span class="math display">\[
+y = (W_0+ B\cdot A) \cdot x + b_0
+\]</span></p>
+<p><span class="math inline">\(\Rightarrow\)</span> The rank <span class="math inline">\(r \leq \min(m,n)\)</span> of matrix <span class="math inline">\(A\)</span> becomes a hyper parameter in our LoRA model.<br>
+<span class="math inline">\(\Rightarrow\)</span> Lower rank means less learnable parameters<br>
+<span class="math inline">\(\Rightarrow\)</span> LoRa</p>
+<p>Applying the updates to all parameters is equivalent to full fine tuning.</p>
+</section>
+<section id="advantages" class="level3">
+<h3 class="anchored" data-anchor-id="advantages">Advantages</h3>
+<p><img src="advantages.png" class="img-fluid"></p>
+<p><img src="advantages3.png" class="img-fluid"></p>
+<p><img src="advantages2.png" class="img-fluid"></p>
+</section>
+<section id="limitations" class="level3">
+<h3 class="anchored" data-anchor-id="limitations">Limitations</h3>
+<p><img src="limitations.png" class="img-fluid"></p>
+</section>
+<section id="application-to-transformers" class="level3">
+<h3 class="anchored" data-anchor-id="application-to-transformers">Application to Transformers</h3>
+<p><img src="transformers.png" class="img-fluid"></p>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<section id="inference-latency" class="level3">
+<h3 class="anchored" data-anchor-id="inference-latency">Inference Latency</h3>
+<p><img src="adapter-inference.png" class="img-fluid"></p>
+</section>
+<section id="benchmark-scores" class="level3">
+<h3 class="anchored" data-anchor-id="benchmark-scores">Benchmark scores</h3>
+<p><img src="bench-bert.png" class="img-fluid"></p>
+<p><img src="bench-gpt.png" class="img-fluid"></p>
+</section>
+<section id="scaling-up-gpt-3-175b" class="level3">
+<h3 class="anchored" data-anchor-id="scaling-up-gpt-3-175b">Scaling up: GPT-3 175b</h3>
+<p><img src="gpt3-175b.png" class="img-fluid"></p>
+</section>
+<section id="which-weights-should-we-pick" class="level3">
+<h3 class="anchored" data-anchor-id="which-weights-should-we-pick">Which weights should we pick?</h3>
+<p><img src="weights.png" class="img-fluid"></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
